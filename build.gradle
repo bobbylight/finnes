@@ -1,0 +1,35 @@
+group 'org.fifesoft'
+version '0.1.0-SNAPSHOT'
+
+allprojects {
+
+    repositories {
+        mavenCentral()
+    }
+
+    task wrapper(type: Wrapper) {
+        gradleVersion = '2.14'
+    }
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'checkstyle'
+    sourceCompatibility = 1.8
+
+    checkstyle {
+        toolVersion = '7.0'
+        configFile = '../config/checkstyle/checkstyle.xml' as File
+    }
+}
+
+project(':n6502') {
+
+}
+
+//project(':finnes') {
+//
+//    dependencies {
+//        compile project(':n6502')
+//    }
+//}

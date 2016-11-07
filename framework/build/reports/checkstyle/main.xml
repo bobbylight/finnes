@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<checkstyle version="7.0">
+<file name="D:\dev\nesemu\framework\src\main\java\org\fife\emu\AbstractCpuContext.java">
+</file>
+<file name="D:\dev\nesemu\framework\src\main\java\org\fife\emu\CpuContext.java">
+</file>
+<file name="D:\dev\nesemu\framework\src\main\java\org\fife\emu\DefaultMemoryReadHandler.java">
+</file>
+<file name="D:\dev\nesemu\framework\src\main\java\org\fife\emu\DefaultMemoryWriteHandler.java">
+</file>
+<file name="D:\dev\nesemu\framework\src\main\java\org\fife\emu\MemoryReadHandler.java">
+</file>
+<file name="D:\dev\nesemu\framework\src\main\java\org\fife\emu\MemoryWriteHandler.java">
+</file>
+<file name="D:\dev\nesemu\framework\src\main\java\org\fife\emu\Util.java">
+</file>
+<file name="D:\dev\nesemu\framework\src\main\java\org\fife\emu\cpu\AbstractCpu.java">
+</file>
+<file name="D:\dev\nesemu\framework\src\main\java\org\fife\emu\cpu\AbstractPortIOCpu.java">
+</file>
+<file name="D:\dev\nesemu\framework\src\main\java\org\fife\emu\cpu\Cpu.java">
+</file>
+<file name="D:\dev\nesemu\framework\src\main\java\org\fife\emu\cpu\IllegalInstructionException.java">
+</file>
+<file name="D:\dev\nesemu\framework\src\main\java\org\fife\emu\cpu\InputPortWriter.java">
+</file>
+<file name="D:\dev\nesemu\framework\src\main\java\org\fife\emu\cpu\OutputPortReader.java">
+</file>
+<file name="D:\dev\nesemu\framework\src\main\java\org\fife\emu\cpu\PortIOCpu.java">
+</file>
+<file name="D:\dev\nesemu\framework\src\main\java\org\fife\emu\cpu\UnemulatedInstructionException.java">
+</file>
+<file name="D:\dev\nesemu\framework\src\main\java\org\fife\emu\cpu\package-info.java">
+</file>
+<file name="D:\dev\nesemu\framework\src\main\java\org\fife\emu\package-info.java">
+</file>
+</checkstyle>
