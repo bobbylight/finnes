@@ -45,7 +45,7 @@ public class UnemulatedInstructionException
 	 */
 	protected static String getHexStringUWord(int uword) {
 		String str = Integer.toHexString(uword);
-		while (str.length()<4) {
+		while (str.length() < 4) {
 			str = "0" + str;
 		}
 		return "0x" + str;
@@ -57,8 +57,8 @@ public class UnemulatedInstructionException
 	 * @return A description of this exception.
 	 */
 	public String getMessage() {
-		String msg = "Unemulated instruction: " +getHexStringUWord(getOpcode());
-		if (super.getMessage()!=null) {
+		String msg = "Unemulated instruction: " + getHexStringUWord(getOpcode());
+		if (super.getMessage() != null) {
 			msg += " (" + super.getMessage() + ")";
 		}
 		return msg;

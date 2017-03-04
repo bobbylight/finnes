@@ -1,5 +1,7 @@
 package org.fife.emu;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import java.io.Serializable;
 
 
@@ -39,7 +41,7 @@ public abstract class AbstractCpuContext implements CpuContext, Serializable {
 		int count = memory.length;
 		memoryReadHandlers = new MemoryReadHandler[count];
 		MemoryReadHandler readHandler = new DefaultMemoryReadHandler(this);
-		for (int i=0; i<count; i++) {
+		for (int i = 0; i < count; i++) {
 			memoryReadHandlers[i] = readHandler;
 		}
 	}
@@ -57,7 +59,7 @@ public abstract class AbstractCpuContext implements CpuContext, Serializable {
 		int count = memory.length;
 		memoryWriteHandlers = new MemoryWriteHandler[count];
 		MemoryWriteHandler writeHandler = new DefaultMemoryWriteHandler(this);
-		for (int i=0; i<count; i++) {
+		for (int i = 0; i < count; i++) {
 			memoryWriteHandlers[i] = writeHandler;
 		}
 	}
@@ -67,6 +69,7 @@ public abstract class AbstractCpuContext implements CpuContext, Serializable {
 	 *
 	 * @return Main memory.  This is an array of bytes.
 	 */
+	@SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "Memory array returned for performance reasons")
 	public int[] getMemory() {
 		return memory;
 	}
@@ -110,7 +113,7 @@ public abstract class AbstractCpuContext implements CpuContext, Serializable {
 	public int readWord(int address) {
 		int val = memoryReadHandlers[address].read(address);
 		address++;
-		return val | (memoryReadHandlers[address].read(address)<<8);
+		return val | (memoryReadHandlers[address].read(address) << 8);
 	}
 
 	/**
@@ -137,9 +140,9 @@ public abstract class AbstractCpuContext implements CpuContext, Serializable {
 	 * @see #writeByte(int, int)
 	 */
 	public void writeWord(int address, int value) {
-		memoryWriteHandlers[address].write(address, value&0xff);
+		memoryWriteHandlers[address].write(address, value & 0xff);
 		address++;
-		memoryWriteHandlers[address].write(address, (value>>8)&0xff);
+		memoryWriteHandlers[address].write(address, (value >> 8) & 0xff);
 	}
 
 }

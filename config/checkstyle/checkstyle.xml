@@ -87,7 +87,7 @@
 
     <module name="TreeWalker">
 
-		<!-- Part of turning off indivial checks: -->
+		<!-- Part of turning off individual checks: -->
 		<!-- http://stackoverflow.com/questions/5761188/checkstyle-suppressioncommentfilter-not-ignoring-specified-rule/5764666#5764666 -->
 		<module name="FileContentsHolder"/>
 		<module name="SuppressWarningsHolder" />
@@ -144,14 +144,14 @@
         <module name="EmptyForIteratorPad"/>
         <module name="GenericWhitespace"/>
         <module name="MethodParamPad"/>
-        <!--<module name="NoWhitespaceAfter"/>-->
-        <!--<module name="NoWhitespaceBefore"/>-->
+        <module name="NoWhitespaceAfter"/>
+        <module name="NoWhitespaceBefore"/>
         <module name="OperatorWrap">
 			<property name="option" value="eol"/>
 		</module>
         <module name="ParenPad"/>
         <module name="TypecastParenPad"/>
-        <!--<module name="WhitespaceAround"/>-->
+        <module name="WhitespaceAround"/>
 
 
         <!-- Modifier Checks                                    -->
@@ -176,7 +176,7 @@
         <!-- Checks for common coding problems               -->
         <!-- See http://checkstyle.sf.net/config_coding.html -->
         <!--<module name="AvoidInlineConditionals"/>-->
-        <!--<module name="EmptyStatement"/> Removed to allow "while (doSomething());" -->
+        <module name="EmptyStatement"/>
         <module name="EqualsHashCode"/>
 		<!-- Completely overridden since it's common in Java to do e.g. this.foo = foo;
         <module name="HiddenField">

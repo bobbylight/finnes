@@ -38,7 +38,7 @@ public class IllegalInstructionException
 	 */
 	public String getMessage() {
 		String msg = "Illegal instruction: " + getHexStringUWord(getOpcode());
-		if (super.getMessage()!=null) {
+		if (super.getMessage() != null) {
 			msg += " (" + super.getMessage() + ")";
 		}
 		return msg;

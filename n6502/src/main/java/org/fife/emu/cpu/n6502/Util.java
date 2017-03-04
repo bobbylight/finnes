@@ -21,7 +21,7 @@ public final class Util {
 
 	public static String toHex(int b) {
 		String str = Integer.toHexString(b).toUpperCase();
-		if (str.length()<2) {
+		if (str.length() < 2) {
 			str = "0" + str;
 		}
 		return str;
@@ -29,7 +29,7 @@ public final class Util {
 
 	public static String toHexWord(int b) {
 		String str = Integer.toHexString(b).toUpperCase();
-		while (str.length()<4) {
+		while (str.length() < 4) {
 			str = "0" + str;
 		}
 		return str;

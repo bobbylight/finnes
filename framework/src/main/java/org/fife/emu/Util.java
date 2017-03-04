@@ -27,7 +27,7 @@ public final class Util {
 	 * @see #getHexStringUWord
 	 */
 	public static String getHexStringUByte(int ubyte) {
-		return (ubyte<0x10 ? "0x0" : "0x") + Integer.toHexString(ubyte);
+		return (ubyte < 0x10 ? "0x0" : "0x") + Integer.toHexString(ubyte);
 	}
 
 	/**
@@ -41,7 +41,7 @@ public final class Util {
 	 */
 	public static String getHexStringUWord(int uword) {
 		String str = Integer.toHexString(uword);
-		while (str.length()<4) {
+		while (str.length() < 4) {
 			str = "0" + str;
 		}
 		return "0x" + str;
@@ -71,9 +71,9 @@ public final class Util {
 		// "-classpath /my/directory/".  So, we can simply search for the
 		// jar name in the classpath string, and if it isn't there, it must
 		// be in the current directory.
-		if (index>-1) {
+		if (index > -1) {
 			int pathBeginning = classPath.lastIndexOf(File.pathSeparator,
-												index-1) + 1;
+												index - 1) + 1;
 			String location = classPath.substring(pathBeginning, index);
 			File temp = new File(System.getProperty("user.dir"), location);
 			return temp.getAbsolutePath();

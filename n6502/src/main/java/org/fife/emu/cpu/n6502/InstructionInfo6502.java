@@ -159,7 +159,7 @@ public class InstructionInfo6502 implements InstructionSet6502 {
 
 		private int opcode;
 		private String name;
-		private int bytes;
+		//private int bytes;
 		private int cycles;
 
 		private static final Field[] INSTRUCTION_FIELDS = getInstructionFields();
@@ -181,7 +181,7 @@ public class InstructionInfo6502 implements InstructionSet6502 {
 			this.opcode = opcode;
 
 			try {
-				for (int i = 0; i< INSTRUCTION_FIELDS.length; i++) {
+				for (int i = 0; i < INSTRUCTION_FIELDS.length; i++) {
 					Field field = INSTRUCTION_FIELDS[i];
 					if (opcode == field.getInt(null)) {
 						String fieldName = field.getName();
@@ -250,7 +250,7 @@ public class InstructionInfo6502 implements InstructionSet6502 {
 			}
 			else if (absolute) {
 				sb.append(" $").append(Util.toHex(bytes[2])).append(Util.toHex(bytes[1]));
-				int address = bytes[1] | (bytes[2]<<8);
+				int address = bytes[1] | (bytes[2] << 8);
 				sb.append(" = #$").append(Util.toHex(context.readByteSafely(address)));
 			}
 			else if (branch) {

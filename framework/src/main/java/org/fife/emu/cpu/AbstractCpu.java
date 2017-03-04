@@ -164,7 +164,7 @@ public abstract class AbstractCpu implements Cpu, Serializable {
 	 * @see #getClockSpeed
 	 */
 	public void setClockSpeed(float speed) {
-		if (speed!=this.clockSpeed) {
+		if (speed != this.clockSpeed) {
 			float old = this.clockSpeed;
 			this.clockSpeed = speed;
 			firePropertyChange(PROPERTY_CLOCK_SPEED, old, speed);

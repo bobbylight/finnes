@@ -96,7 +96,7 @@ public abstract class AbstractPortIOCpu extends AbstractCpu
 
 		// Notify any listeners of the port value change.
 		int count = outputPortReaderList.size();
-		for (int i=0; i<count; i++) {
+		for (int i = 0; i < count; i++) {
 			OutputPortReader r = (OutputPortReader)outputPortReaderList.get(i);
 			r.outputPortValueChanged(port, old, value);
 		}

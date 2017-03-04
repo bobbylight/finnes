@@ -5,31 +5,39 @@ allprojects {
 
     repositories {
         mavenCentral()
+        maven {
+            url "https://oss.sonatype.org/content/repositories/snapshots"
+        }
     }
 
     task wrapper(type: Wrapper) {
-        gradleVersion = '2.14'
+        gradleVersion = '3.4'
     }
 }
 
 subprojects {
     apply plugin: 'java'
     apply plugin: 'checkstyle'
+    apply plugin: 'findbugs'
     sourceCompatibility = 1.8
 
     checkstyle {
-        toolVersion = '7.0'
+        toolVersion = '7.6'
         configFile = '../config/checkstyle/checkstyle.xml' as File
     }
+
+    tasks.withType(FindBugs) {
+        reports {
+            xml.enabled = false
+            html.enabled = true
+        }
+    }
+
+    dependencies {
+        compile 'org.slf4j:slf4j-api:1.7.24'
+        compile 'ch.qos.logback:logback-classic:1.2.1'
+        compile 'ch.qos.logback:logback-core:1.2.1'
+        compile 'com.google.code.findbugs:annotations:3.0.1u2'
+        testCompile 'junit:junit:4.12'
+    }
 }
-
-project(':n6502') {
-
-}
-
-//project(':finnes') {
-//
-//    dependencies {
-//        compile project(':n6502')
-//    }
-//}

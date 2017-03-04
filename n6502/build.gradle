@@ -3,6 +3,4 @@ version '0.1.0-SNAPSHOT'
 
 dependencies {
     compile project(':framework')
-
-    testCompile 'junit:junit:4.11'
 }

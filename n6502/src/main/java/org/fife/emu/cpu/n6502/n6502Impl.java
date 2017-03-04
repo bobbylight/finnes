@@ -1,8 +1,10 @@
 package org.fife.emu.cpu.n6502;
 
 import java.io.*;
+import java.nio.charset.Charset;
 import java.nio.file.Paths;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.fife.emu.*;
 import org.fife.emu.cpu.*;
 
@@ -14,10 +16,11 @@ import org.fife.emu.cpu.*;
  * @author Robert Futrell
  * @version 1.0
  */
-@SuppressWarnings({ "checkstyle:TypeName", "checkstyle:MethodName" })
+@SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "CPU name is OK for class name")
+@SuppressWarnings({"checkstyle:TypeName", "checkstyle:MethodName", "checkstyle:WhitespaeAround"})
 public class n6502Impl extends AbstractCpu implements n6502, Serializable {
 
-private static final int MIN_DEBUG_OUT_INDEX	= 0;
+	private static final int MIN_DEBUG_OUT_INDEX = 0;
 
 	private static final long serialVersionUID = 2920750437770524090L;
 
@@ -26,8 +29,8 @@ private static final int MIN_DEBUG_OUT_INDEX	= 0;
 	 * will optimize away "if" statements where conditional is always
 	 * false.
 	 */
-	private static final boolean DEBUG_OPCODE_COUNTS				= false;
-	private static final boolean DEBUG_COUNT_EXECUTED_INSTRUCTIONS	= true;
+	private static final boolean DEBUG_OPCODE_COUNTS = false;
+	private static final boolean DEBUG_COUNT_EXECUTED_INSTRUCTIONS = true;
 
 	protected int flagC;
 	protected int flagI;
@@ -43,27 +46,29 @@ private static final int MIN_DEBUG_OUT_INDEX	= 0;
 	protected boolean halted;
 
 	private long[] opcodeCounts;
-	private long   executedInstructionCount;
+	private long executedInstructionCount;
 	protected long totCycles;
-	protected int  endCycles;
+	protected int endCycles;
 
 	private Debug6502State stateLogger;
 	private boolean logState;
 
 	private int debugOutIndex;
+	@SuppressFBWarnings(value = "UWF_UNWRITTEN_FIELD", justification = "Just for debugging purposes")
 	private PrintWriter debugOut;
 	private long debugExecutedInstructionCount;
 
-	private static final int STACK_BOTTOM		= 0x100;   // 0x100-0x1ff
+	private static final int STACK_BOTTOM = 0x100;   // 0x100-0x1ff
 
-	private static final int N_BIT	= 0x80;
+	private static final int N_BIT = 0x80;
 
 	/**
 	 * Constructor.
 	 *
-	 * @param context The CPU context.
+	 * @param context    The CPU context.
 	 * @param clockSpeed The clock speed of this CPU.
 	 */
+	@SuppressFBWarnings(value = "NM_CLASS_NAMING_CONVENTION", justification = "CPU name is OK for class name")
 	public n6502Impl(CpuContext context, float clockSpeed) {
 
 		super(context, clockSpeed);
@@ -101,9 +106,9 @@ private static final int MIN_DEBUG_OUT_INDEX	= 0;
 	 */
 	private int _postIndIndY() {
 		int temp = context.readWord(context.readByte(pc++));
-		crossingPageBoundary(temp, temp+y);
+		crossingPageBoundary(temp, temp + y);
 		//return (temp+y)&0xffff;
-		return temp+y;
+		return temp + y;
 	}
 
 	/**
@@ -114,7 +119,7 @@ private static final int MIN_DEBUG_OUT_INDEX	= 0;
 	 * @see #_postIndIndY()
 	 */
 	private int _preIndIndX() {
-		int data = (context.readByte(pc++)+x)&0xff;
+		int data = (context.readByte(pc++) + x) & 0xff;
 		return context.readWord(data);
 	}
 
@@ -137,7 +142,7 @@ private static final int MIN_DEBUG_OUT_INDEX	= 0;
 	 * @see #_zeroPage()
 	 */
 	private int _zeroPageIndexed(int index) {
-		return (context.readByte(pc++)+index)&0xff;
+		return (context.readByte(pc++) + index) & 0xff;
 	}
 
 	/**
@@ -157,7 +162,7 @@ private static final int MIN_DEBUG_OUT_INDEX	= 0;
 	 * (STA, STX, STY, SHA, SHX, SHY).
 	 *
 	 * @param index The index.
-	 * @param b The byte to write.
+	 * @param b     The byte to write.
 	 */
 	private void absoluteIndex_Write(int index, int b) {
 		context.writeByte(_absIndexed(index), b);
@@ -194,7 +199,7 @@ private static final int MIN_DEBUG_OUT_INDEX	= 0;
 	 * @param address2 The second address.
 	 */
 	private void crossingPageBoundary(int address1, int address2) {
-		cycles += ((address1^address2)&0x100)>>8;
+		cycles += ((address1 ^ address2) & 0x100) >> 8;
 	}
 
 	/**
@@ -209,10 +214,10 @@ private static final int MIN_DEBUG_OUT_INDEX	= 0;
 //			throw new InternalError("ADC instruction in BCD mode (not implemented)");
 //		}
 //		else {
-			int temp = a + val + flagC;
-			flagC  = (temp&0x100)>>8;
-			flagV = ((~(a^val))&(a^temp)&0x80) >> 7;
-			flagNZ = a = temp&0xff;
+		int temp = a + val + flagC;
+		flagC = (temp & 0x100) >> 8;
+		flagV = ((~(a ^ val)) & (a ^ temp) & 0x80) >> 7;
+		flagNZ = a = temp & 0xff;
 //		}
 	}
 
@@ -221,7 +226,7 @@ private static final int MIN_DEBUG_OUT_INDEX	= 0;
 	 * appropriately.
 	 *
 	 * @param val The value to logically AND to the A
-	 *        register.
+	 *            register.
 	 */
 	private void doAND(int val) {
 		flagNZ = a &= val;
@@ -235,8 +240,8 @@ private static final int MIN_DEBUG_OUT_INDEX	= 0;
 	 * @return The modified byte.
 	 */
 	private int doASL(int b) {
-		flagC = (b>>7)&0x01;
-		return flagNZ = (b<<1)&0xff;
+		flagC = (b >> 7) & 0x01;
+		return flagNZ = (b << 1) & 0xff;
 	}
 
 	/**
@@ -261,8 +266,8 @@ private static final int MIN_DEBUG_OUT_INDEX	= 0;
 	private void doBIT(int b) {
 		// Z flag set from result ("a&b"), while N flag is set
 		// from just "b".
-		flagNZ = ((b&a)>0?1:0) | ((b&0x80)<<1);
-		flagV  =  (b&0x40)>>6;            // "V" flag is bit 6.
+		flagNZ = ((b & a) > 0 ? 1 : 0) | ((b & 0x80) << 1);
+		flagV = (b & 0x40) >> 6;            // "V" flag is bit 6.
 	}
 
 	/**
@@ -276,10 +281,9 @@ private static final int MIN_DEBUG_OUT_INDEX	= 0;
 		if (test) {
 			cycles += 3; // 2 cycles + 1 for branch
 			int offset = (byte)context.readByte(pc++); // Force to -128,127.
-			crossingPageBoundary(pc, pc+offset); // +1 if on different page
+			crossingPageBoundary(pc, pc + offset); // +1 if on different page
 			pc += offset;
-		}
-		else {
+		} else {
 			pc++; // Skip branch address.
 			cycles += 2;
 		}
@@ -303,13 +307,13 @@ private static final int MIN_DEBUG_OUT_INDEX	= 0;
 	 * All flags are updated appropriately.
 	 *
 	 * @param reg The value of a register (one of <code>a</code>,
-	 *        <code>x</code> or <code>y</code>).
-	 * @param b The byte to compare with the register.
+	 *            <code>x</code> or <code>y</code>).
+	 * @param b   The byte to compare with the register.
 	 */
 	private void doCMP(int reg, int b) {
 		int result = reg - b;
 		flagC = (~result >> 8) & 0x01;
-		flagNZ = result&0xff;
+		flagNZ = result & 0xff;
 	}
 
 	/**
@@ -320,7 +324,7 @@ private static final int MIN_DEBUG_OUT_INDEX	= 0;
 	 * @return The decremented byte.
 	 */
 	private int doDEC(int b) {
-		return flagNZ = (b-1)&0xff;
+		return flagNZ = (b - 1) & 0xff;
 	}
 
 	/**
@@ -330,7 +334,7 @@ private static final int MIN_DEBUG_OUT_INDEX	= 0;
 	 * @param address The address in memory to DEC.
 	 */
 	private void doDECMem(int address) {
-		int val  = context.readByte(address);
+		int val = context.readByte(address);
 		context.writeByte(address, val); // Write back
 		val = doDEC(val);
 		context.writeByte(address, val);
@@ -341,7 +345,7 @@ private static final int MIN_DEBUG_OUT_INDEX	= 0;
 	 * updated appropriately.
 	 *
 	 * @param b The byte to EOR with the <code>a</code>
-	 *        register.
+	 *          register.
 	 */
 	private void doEOR(int b) {
 		flagNZ = a ^= b;
@@ -355,7 +359,7 @@ private static final int MIN_DEBUG_OUT_INDEX	= 0;
 	 * @return The incremented byte.
 	 */
 	private int doINC(int b) {
-		return flagNZ = (b+1)&0xff;
+		return flagNZ = (b + 1) & 0xff;
 	}
 
 	/**
@@ -365,7 +369,7 @@ private static final int MIN_DEBUG_OUT_INDEX	= 0;
 	 * @param address The address in memory to INC.
 	 */
 	private void doINCMem(int address) {
-		int val  = context.readByte(address);
+		int val = context.readByte(address);
 		context.writeByte(address, val); // Write back
 		val = doINC(val);
 		context.writeByte(address, val);
@@ -381,7 +385,7 @@ private static final int MIN_DEBUG_OUT_INDEX	= 0;
 	private void doISCMem(int address) {
 		int val = context.readByte(address);
 		context.writeByte(address, val); // Write back
-		val = (val+1)&0xff;
+		val = (val + 1) & 0xff;
 		doSBC(val);
 		context.writeByte(address, val);
 	}
@@ -399,7 +403,7 @@ private static final int MIN_DEBUG_OUT_INDEX	= 0;
 	 * appropriately.
 	 *
 	 * @param b The byte to load into the <code>a</code>
-	 *        and <code>x</code> registers.
+	 *          and <code>x</code> registers.
 	 */
 	private void doLAX(int b) {
 		flagNZ = a = x = b;
@@ -410,7 +414,7 @@ private static final int MIN_DEBUG_OUT_INDEX	= 0;
 	 * appropriately.
 	 *
 	 * @param b The byte to load into the <code>a</code>
-	 *        register.
+	 *          register.
 	 */
 	private void doLDA(int b) {
 		flagNZ = a = b;
@@ -421,7 +425,7 @@ private static final int MIN_DEBUG_OUT_INDEX	= 0;
 	 * appropriately.
 	 *
 	 * @param b The byte to load into the <code>x</code>
-	 *        register.
+	 *          register.
 	 */
 	private void doLDX(int b) {
 		flagNZ = x = b;
@@ -432,7 +436,7 @@ private static final int MIN_DEBUG_OUT_INDEX	= 0;
 	 * appropriately.
 	 *
 	 * @param b The byte to load into the <code>y</code>
-	 *        register.
+	 *          register.
 	 */
 	private void doLDY(int b) {
 		flagNZ = y = b;
@@ -445,8 +449,8 @@ private static final int MIN_DEBUG_OUT_INDEX	= 0;
 	 * @return The modified byte.
 	 */
 	private int doLSR(int b) {
-		flagC = b&0x01;
-		return flagNZ = b>>1;
+		flagC = b & 0x01;
+		return flagNZ = b >> 1;
 	}
 
 	/**
@@ -456,7 +460,7 @@ private static final int MIN_DEBUG_OUT_INDEX	= 0;
 	 * @param address The address in memory to LSR.
 	 */
 	private void doLSRMem(int address) {
-		int val  = context.readByte(address);
+		int val = context.readByte(address);
 		context.writeByte(address, val); // Write back
 		val = doLSR(val);
 		context.writeByte(address, val);
@@ -467,7 +471,7 @@ private static final int MIN_DEBUG_OUT_INDEX	= 0;
 	 * appropriately.
 	 *
 	 * @param val The value to logically OR to the
-	 *        <code>A</code> register.
+	 *            <code>A</code> register.
 	 */
 	private void doORA(int val) {
 		flagNZ = a |= val;
@@ -480,8 +484,8 @@ private static final int MIN_DEBUG_OUT_INDEX	= 0;
 	 * @return The modified byte.
 	 */
 	private int doROL(int b) {
-		flagNZ = ((b<<1)&0xff) | flagC;
-		flagC = (b>>7)&0x01;
+		flagNZ = ((b << 1) & 0xff) | flagC;
+		flagC = (b >> 7) & 0x01;
 		return flagNZ;
 	}
 
@@ -505,8 +509,8 @@ private static final int MIN_DEBUG_OUT_INDEX	= 0;
 	 * @return The modified byte.
 	 */
 	private int doROR(int b) {
-		flagNZ = (b>>1) | (flagC<<7);
-		flagC = b&0x01;
+		flagNZ = (b >> 1) | (flagC << 7);
+		flagC = b & 0x01;
 		return flagNZ;
 	}
 
@@ -517,7 +521,7 @@ private static final int MIN_DEBUG_OUT_INDEX	= 0;
 	 * @param address The address in memory to ROR.
 	 */
 	private void doRORMem(int address) {
-		int val  = context.readByte(address);
+		int val = context.readByte(address);
 		context.writeByte(address, val); // Write back
 		val = doROR(val);
 		context.writeByte(address, val);
@@ -538,7 +542,7 @@ private static final int MIN_DEBUG_OUT_INDEX	= 0;
 	 * updated appropriately.
 	 *
 	 * @param b The byte to subtract from the
-	 *        <code>A</code> register.
+	 *          <code>A</code> register.
 	 */
 	protected void doSBC(int b) {
 // TODO: Implement BCD mode.
@@ -546,10 +550,10 @@ private static final int MIN_DEBUG_OUT_INDEX	= 0;
 //			throw new InternalError("SBC instruction in bcd mode (not implemented)");
 //		}
 //		else {
-			int temp = a - b - (flagC^0x01);
-			flagV = ((a^b)&(a^temp)&0x80)>>7;
-			flagNZ = a = temp&0xff;
-			flagC  = ((~temp)>>8)&0x01;
+		int temp = a - b - (flagC ^ 0x01);
+		flagV = ((a ^ b) & (a ^ temp) & 0x80) >> 7;
+		flagNZ = a = temp & 0xff;
+		flagC = ((~temp) >> 8) & 0x01;
 //		}
 	}
 
@@ -562,8 +566,8 @@ private static final int MIN_DEBUG_OUT_INDEX	= 0;
 	private void doSLOMem(int address) {
 		int val = context.readByte(address);
 		context.writeByte(address, val); // Write the value back.
-		flagC = (val>>7)&0x01;
-		val = (val<<1)&0xff;
+		flagC = (val >> 7) & 0x01;
+		val = (val << 1) & 0xff;
 		context.writeByte(address, val);
 		flagNZ = a |= val;
 	}
@@ -571,21 +575,21 @@ private static final int MIN_DEBUG_OUT_INDEX	= 0;
 	/**
 	 * Dumps the number of times each n6502 instruction was executed
 	 * to a file.<p>
-	 *
+	 * <p>
 	 * If {@link #DEBUG_OPCODE_COUNTS} is not set to
 	 * <code>true</code>, this method will not dump out instruction
 	 * counts.
 	 */
 	public void dumpOpcodeCounts() {
 		try {
-			PrintWriter out = new PrintWriter(new BufferedWriter(
-							new FileWriter("n6502_opcodeCounts.txt")));
+			PrintWriter out = new PrintWriter(new File("n6502_opcodeCounts.txt"),
+				Charset.defaultCharset().name());
 			if (!DEBUG_OPCODE_COUNTS) {
 				out.println("Opcode counting was not enabled for the n6502");
 				out.close();
 				return;
 			}
-			for (int i=0; i<256; i++) {
+			for (int i = 0; i < 256; i++) {
 				out.println(i + ":\t" + opcodeCounts[i]);
 			}
 			out.close();
@@ -595,9 +599,9 @@ private static final int MIN_DEBUG_OUT_INDEX	= 0;
 	}
 
 	private int earliestIRQBefore(int time) {
-		if (flagI==0) {
+		if (flagI == 0) {
 			int irqTime = 99999;//apu.earliest_irq();
-			if (irqTime<time) {
+			if (irqTime < time) {
 				time = irqTime;
 			}
 		}
@@ -617,8 +621,8 @@ private static final int MIN_DEBUG_OUT_INDEX	= 0;
 	 *
 	 * @param c The number of cycles to run.
 	 * @return The number of cycles that the CPU burned over
-	 *         <code>cycles</code>.  This will be a number
-	 *         less than <code>1</code>.
+	 * <code>cycles</code>.  This will be a number
+	 * less than <code>1</code>.
 	 */
 	public int execute(int c) {
 		return executeUntil(cycles + c);
@@ -630,8 +634,8 @@ private static final int MIN_DEBUG_OUT_INDEX	= 0;
 			return 0;
 		}
 
-		while (cycles <until) {
-endCycles = until;
+		while (cycles < until) {
+			endCycles = until;
 //			endCycles = earliestIRQBefore(until);
 //			if (endCycles<=cycles) {
 //				irq();
@@ -651,7 +655,7 @@ endCycles = until;
 
 		int addr;
 
-		while (cycles <endCycles) {
+		while (cycles < endCycles) {
 
 			if (logState) {
 				try {
@@ -700,12 +704,12 @@ endCycles = until;
 
 			switch (opcode) {
 
-				case 0x00:	// BRK - Break
+				case 0x00:    // BRK - Break
 					doBRK();
 					cycles += 7;
 					break;
 
-				case 0x01:	// ORA ($44,X) - Indirect,X
+				case 0x01:    // ORA ($44,X) - Indirect,X
 					doORA(indexedIndirect_Read());
 					cycles += 6;
 					break;
@@ -730,19 +734,19 @@ endCycles = until;
 					cycles += 8;
 					break;
 
-				case 0x04:	// * DOP/SKB $44 - Zero Page
+				case 0x04:    // * DOP/SKB $44 - Zero Page
 				case 0x44:
 				case 0x64:
 					pc++;
 					cycles += 3;
 					break;
 
-				case 0x05:	// ORA $44 - Zero Page
+				case 0x05:    // ORA $44 - Zero Page
 					doORA(zeroPage_Read());
 					cycles += 3;
 					break;
 
-				case 0x06:	// ASL $44 - Zero page
+				case 0x06:    // ASL $44 - Zero page
 					doASLMem(_zeroPage());
 					cycles += 5;
 					break;
@@ -752,19 +756,19 @@ endCycles = until;
 					cycles += 5;
 					break;
 
-				case 0x08:	// PHP - Immediate (PusH Processor status)
+				case 0x08:    // PHP - Immediate (PusH Processor status)
 					context.readByte(pc); // Throw away
 					pushByte(getRegP());
 					cycles += 3;
 					break;
 
-				case 0x09:	// ORA #$44 - Immediate
+				case 0x09:    // ORA #$44 - Immediate
 					doORA(context.readByte(pc));
 					pc++;
 					cycles += 2;
 					break;
 
-				case 0x0A:	// ASL - SHL A
+				case 0x0A:    // ASL - SHL A
 					a = doASL(a);
 					cycles += 2;
 					break;
@@ -772,17 +776,17 @@ endCycles = until;
 				case 0x0B:
 					throw new UnemulatedInstructionException(opcode);
 
-				case 0x0C:	// * TOP/NOP/SKW - Absolute
+				case 0x0C:    // * TOP/NOP/SKW - Absolute
 					absolute_Read();
 					cycles += 4;
 					break;
 
-				case 0x0D:	// ORA $4400 - Absolute
+				case 0x0D:    // ORA $4400 - Absolute
 					doORA(absolute_Read());
 					cycles += 4;
 					break;
 
-				case 0x0E:	// ASL $4400 - Absolute
+				case 0x0E:    // ASL $4400 - Absolute
 					doASLMem(context.readWord(pc));
 					pc += 2;
 					cycles += 6;
@@ -794,11 +798,11 @@ endCycles = until;
 					cycles += 6;
 					break;
 
-				case 0x10:	// BPL - Branch on PLus
-					doBranch(getFlagN()==0);
+				case 0x10:    // BPL - Branch on PLus
+					doBranch(getFlagN() == 0);
 					break;
 
-				case 0x11:	// ORA ($44),Y - Indirect,Y
+				case 0x11:    // ORA ($44),Y - Indirect,Y
 					doORA(indirectIndexed_Read()); // cycles-- if page boundary crossed.
 					cycles += 5;
 					break;
@@ -810,7 +814,7 @@ endCycles = until;
 					cycles += 8;
 					break;
 
-				case 0x14:	// * DOP/SKB $44,X - Zero Page,X
+				case 0x14:    // * DOP/SKB $44,X - Zero Page,X
 				case 0x34:
 				case 0x54:
 				case 0x74:
@@ -820,12 +824,12 @@ endCycles = until;
 					cycles += 4;
 					break;
 
-				case 0x15:	// ORA $44,X - Zero Page,X
+				case 0x15:    // ORA $44,X - Zero Page,X
 					doORA(zeroPageIndexed_Read(x));
 					cycles += 4;
 					break;
 
-				case 0x16:	// ASL $44,X - Zero Page,X
+				case 0x16:    // ASL $44,X - Zero Page,X
 					doASLMem(_zeroPageIndexed(x));
 					cycles += 6;
 					break;
@@ -835,17 +839,17 @@ endCycles = until;
 					cycles += 6;
 					break;
 
-				case 0x18:	// CLC - CLear Carry flag
+				case 0x18:    // CLC - CLear Carry flag
 					flagC = 0;
 					cycles += 2;
 					break;
 
-				case 0x19:	// ORA $4400,Y - Absolute,Y
+				case 0x19:    // ORA $4400,Y - Absolute,Y
 					doORA(absoluteIndex_Read(y)); // cycles-- if page boundary crossed.
 					cycles += 4;
 					break;
 
-				case 0x1A:	// * NOP - Implied
+				case 0x1A:    // * NOP - Implied
 				case 0x3A:
 				case 0x5A:
 				case 0x7A:
@@ -860,7 +864,7 @@ endCycles = until;
 					cycles += 7;
 					break;
 
-				case 0x1C:	// * TOP/NOP/SKW - Absolute,X
+				case 0x1C:    // * TOP/NOP/SKW - Absolute,X
 				case 0x3C:
 				case 0x5C:
 				case 0x7C:
@@ -871,12 +875,12 @@ endCycles = until;
 					cycles += 4;
 					break;
 
-				case 0x1D:	// ORA $4400,X - Absolute,X
+				case 0x1D:    // ORA $4400,X - Absolute,X
 					doORA(absoluteIndex_Read(x)); // cycles-- if page boundary crossed.
 					cycles += 4;
 					break;
 
-				case 0x1E:	// ASL $4400,X - Absolute,X
+				case 0x1E:    // ASL $4400,X - Absolute,X
 					doASLMem(_absIndexed(x));
 					cycles += 7;
 					break;
@@ -886,13 +890,13 @@ endCycles = until;
 					cycles += 7;
 					break;
 
-				case 0x20:	// JSR - Jump to SubRoutine, Absolute
-					pushWord(pc+1);
+				case 0x20:    // JSR - Jump to SubRoutine, Absolute
+					pushWord(pc + 1);
 					pc = context.readWord(pc);
 					cycles += 6;
 					break;
 
-				case 0x21:	// AND ($44,X) - Indirect,X
+				case 0x21:    // AND ($44,X) - Indirect,X
 					doAND(indexedIndirect_Read());
 					cycles += 6;
 					break;
@@ -902,17 +906,17 @@ endCycles = until;
 				case 0x23:
 					throw new UnemulatedInstructionException(opcode);
 
-				case 0x24:	// BIT $44 - Zero Page
+				case 0x24:    // BIT $44 - Zero Page
 					doBIT(zeroPage_Read());
 					cycles += 3;
 					break;
 
-				case 0x25:	// AND $44 - Zero page
+				case 0x25:    // AND $44 - Zero page
 					doAND(zeroPage_Read());
 					cycles += 3;
 					break;
 
-				case 0x26:	// ROL $44 - Zero Page
+				case 0x26:    // ROL $44 - Zero Page
 					doROLMem(_zeroPage());
 					cycles += 5;
 					break;
@@ -920,19 +924,19 @@ endCycles = until;
 				case 0x27:
 					throw new UnemulatedInstructionException(opcode);
 
-				case 0x28:	// PLP - Immediate (PuLl Processor status)
+				case 0x28:    // PLP - Immediate (PuLl Processor status)
 					context.readByte(pc); // Throw away
 					setRegP(popByte());
 					cycles += 4;
 					break;
 
-				case 0x29:	// AND #$44 - immediate
+				case 0x29:    // AND #$44 - immediate
 					doAND(context.readByte(pc));
 					pc++;
 					cycles += 2;
 					break;
 
-				case 0x2A:	// ROL A - Accumulator
+				case 0x2A:    // ROL A - Accumulator
 					a = doROL(a);
 					cycles += 2;
 					break;
@@ -940,17 +944,17 @@ endCycles = until;
 				case 0x2B:
 					throw new UnemulatedInstructionException(opcode);
 
-				case 0x2C:	// BIT $4400 - Absolute
+				case 0x2C:    // BIT $4400 - Absolute
 					doBIT(absolute_Read());
 					cycles += 4;
 					break;
 
-				case 0x2D:	// AND $4400 - Absolute
+				case 0x2D:    // AND $4400 - Absolute
 					doAND(absolute_Read());
 					cycles += 4;
 					break;
 
-				case 0x2E:	// ROL $4400 - Absolute
+				case 0x2E:    // ROL $4400 - Absolute
 					doROLMem(context.readWord(pc));
 					pc += 2;
 					cycles += 6;
@@ -959,11 +963,11 @@ endCycles = until;
 				case 0x2F:
 					throw new UnemulatedInstructionException(opcode);
 
-				case 0x30:	// BMI - Branch on MInus
-					doBranch(getFlagN()>0);
+				case 0x30:    // BMI - Branch on MInus
+					doBranch(getFlagN() > 0);
 					break;
 
-				case 0x31:	// AND ($44),Y - Indirect,Y
+				case 0x31:    // AND ($44),Y - Indirect,Y
 					doAND(indirectIndexed_Read()); // cycles-- if page boundary crossed.
 					cycles += 5;
 					break;
@@ -973,14 +977,14 @@ endCycles = until;
 				case 0x33:
 					throw new UnemulatedInstructionException(opcode);
 
-				// 0x34 handled previously
+					// 0x34 handled previously
 
-				case 0x35:	// AND $44,x - Zero Page,X
+				case 0x35:    // AND $44,x - Zero Page,X
 					doAND(zeroPageIndexed_Read(x));
 					cycles += 4;
 					break;
 
-				case 0x36:	// ROL $44,X - Zero Page,X
+				case 0x36:    // ROL $44,X - Zero Page,X
 					doROLMem(_zeroPageIndexed(x));
 					cycles += 6;
 					break;
@@ -988,12 +992,12 @@ endCycles = until;
 				case 0x37:
 					throw new UnemulatedInstructionException(opcode);
 
-				case 0x38:	// SEC - SEt Carry flag)
+				case 0x38:    // SEC - SEt Carry flag)
 					flagC = 1;
 					cycles += 2;
 					break;
 
-				case 0x39:	// AND $4400,Y - Absolute,Y
+				case 0x39:    // AND $4400,Y - Absolute,Y
 					doAND(absoluteIndex_Read(y)); // cycles-- if page boundary crossed.
 					cycles += 4;
 					break;
@@ -1003,14 +1007,14 @@ endCycles = until;
 				case 0x3B:
 					throw new UnemulatedInstructionException(opcode);
 
-				// 0x3C handled previously
+					// 0x3C handled previously
 
-				case 0x3D:	// AND $4400,X - Absolute,X
+				case 0x3D:    // AND $4400,X - Absolute,X
 					doAND(absoluteIndex_Read(x)); // cycles-- if page boundary crossed.
 					cycles += 4;
 					break;
 
-				case 0x3E:	// ROL $4400 - Absolute,X
+				case 0x3E:    // ROL $4400 - Absolute,X
 					doROLMem(_absIndexed(x));
 					cycles += 7;
 					break;
@@ -1018,12 +1022,12 @@ endCycles = until;
 				case 0x3F:
 					throw new UnemulatedInstructionException(opcode);
 
-				case 0x40:	// RTI - Implied
+				case 0x40:    // RTI - Implied
 					doRTI();
 					cycles += 6;
 					break;
 
-				case 0x41:	// EOR ($44,X) - Indirect,X
+				case 0x41:    // EOR ($44,X) - Indirect,X
 					doEOR(indexedIndirect_Read());
 					cycles += 6;
 					break;
@@ -1033,14 +1037,14 @@ endCycles = until;
 				case 0x43:
 					throw new UnemulatedInstructionException(opcode);
 
-				// 0x44 handled previously
+					// 0x44 handled previously
 
-				case 0x45:	// EOR $44 - Zero Page
+				case 0x45:    // EOR $44 - Zero Page
 					doEOR(zeroPage_Read());
 					cycles += 3;
 					break;
 
-				case 0x46:	// LSR $44 - Zero Page
+				case 0x46:    // LSR $44 - Zero Page
 					doLSRMem(_zeroPage());
 					cycles += 5;
 					break;
@@ -1048,19 +1052,19 @@ endCycles = until;
 				case 0x47:
 					throw new UnemulatedInstructionException(opcode);
 
-				case 0x48:	// PHA - Immediate (PusH Accumulator)
+				case 0x48:    // PHA - Immediate (PusH Accumulator)
 					context.readByte(pc); // Throw away
 					pushByte(a);
 					cycles += 3;
 					break;
 
-				case 0x49:	// EOR #$44 - Immediate
+				case 0x49:    // EOR #$44 - Immediate
 					doEOR(context.readByte(pc));
 					pc++;
 					cycles += 2;
 					break;
 
-				case 0x4A:	// LSR A - Accumulator
+				case 0x4A:    // LSR A - Accumulator
 					a = doLSR(a);
 					cycles += 2;
 					break;
@@ -1068,17 +1072,17 @@ endCycles = until;
 				case 0x4B:
 					throw new UnemulatedInstructionException(opcode);
 
-				case 0x4C:	// JMP $5597 - Absolute
+				case 0x4C:    // JMP $5597 - Absolute
 					pc = context.readWord(pc);
 					cycles += 3;
 					break;
 
-				case 0x4D:	// EOR $4400 - Absolute
+				case 0x4D:    // EOR $4400 - Absolute
 					doEOR(absolute_Read());
 					cycles += 4;
 					break;
 
-				case 0x4E:	// LSR $4400 - Absolute
+				case 0x4E:    // LSR $4400 - Absolute
 					doLSRMem(context.readWord(pc));
 					pc += 2;
 					cycles += 6;
@@ -1087,11 +1091,11 @@ endCycles = until;
 				case 0x4F:
 					throw new UnemulatedInstructionException(opcode);
 
-				case 0x50:	// BVC - Branch on oVerflow Clear
-					doBranch(flagV==0);
+				case 0x50:    // BVC - Branch on oVerflow Clear
+					doBranch(flagV == 0);
 					break;
 
-				case 0x51:	// EOR ($44),Y - Indirect,Y
+				case 0x51:    // EOR ($44),Y - Indirect,Y
 					doEOR(indirectIndexed_Read()); // cycles-- if page boundary crossed.
 					cycles += 5;
 					break;
@@ -1101,14 +1105,14 @@ endCycles = until;
 				case 0x53:
 					throw new UnemulatedInstructionException(opcode);
 
-				// 0x54 handled previously
+					// 0x54 handled previously
 
-				case 0x55:	// EOR $44,X - Zero Page,X
+				case 0x55:    // EOR $44,X - Zero Page,X
 					doEOR(zeroPageIndexed_Read(x));
 					cycles += 4;
 					break;
 
-				case 0x56:	// LSR $44,X - Zero Page,X
+				case 0x56:    // LSR $44,X - Zero Page,X
 					doLSRMem(_zeroPageIndexed(x));
 					cycles += 6;
 					break;
@@ -1116,12 +1120,12 @@ endCycles = until;
 				case 0x57:
 					throw new UnemulatedInstructionException(opcode);
 
-				case 0x58:	// CLI - CLear Interrupt flag
+				case 0x58:    // CLI - CLear Interrupt flag
 					flagI = 0;
 					cycles += 2;
 					return; // Stop CPU immediately.
 
-				case 0x59:	// EOR $4400,Y - Absolute,Y
+				case 0x59:    // EOR $4400,Y - Absolute,Y
 					doEOR(absoluteIndex_Read(y)); // cycles-- if page boundary crossed.
 					cycles += 4;
 					break;
@@ -1131,14 +1135,14 @@ endCycles = until;
 				case 0x5B:
 					throw new UnemulatedInstructionException(opcode);
 
-				// 0x5C handled previously
+					// 0x5C handled previously
 
-				case 0x5D:	// EOR $4400,X - Absolute,X
+				case 0x5D:    // EOR $4400,X - Absolute,X
 					doEOR(absoluteIndex_Read(x)); // cycles-- if page boundary crossed.
 					cycles += 4;
 					break;
 
-				case 0x5E:	// LSR $4400,X - Absolute,X
+				case 0x5E:    // LSR $4400,X - Absolute,X
 					doLSRMem(_absIndexed(x));
 					cycles += 7;
 					break;
@@ -1146,13 +1150,13 @@ endCycles = until;
 				case 0x5F:
 					throw new UnemulatedInstructionException(opcode);
 
-				case 0x60:	// RTS - Implied
+				case 0x60:    // RTS - Implied
 					context.readByte(pc); // Throw away
-					pc = popWord()+1;
+					pc = popWord() + 1;
 					cycles += 6;
 					break;
 
-				case 0x61:	// ADC ($44,X) - Indirect,X
+				case 0x61:    // ADC ($44,X) - Indirect,X
 					doADC(indexedIndirect_Read());
 					cycles += 6;
 					break;
@@ -1162,14 +1166,14 @@ endCycles = until;
 				case 0x63:
 					throw new UnemulatedInstructionException(opcode);
 
-				// 0x64 handled previously
+					// 0x64 handled previously
 
-				case 0x65:	// ADC $44 - Zero page
+				case 0x65:    // ADC $44 - Zero page
 					doADC(zeroPage_Read());
 					cycles += 3;
 					break;
 
-				case 0x66:	// ROR $44 - Zero Page
+				case 0x66:    // ROR $44 - Zero Page
 					doRORMem(_zeroPage());
 					cycles += 5;
 					break;
@@ -1177,19 +1181,19 @@ endCycles = until;
 				case 0x67:
 					throw new UnemulatedInstructionException(opcode);
 
-				case 0x68:	// PLA - Immediate (puLl Accumulator)
+				case 0x68:    // PLA - Immediate (puLl Accumulator)
 					context.readByte(pc); // Throw away
 					flagNZ = a = popByte();
 					cycles += 4;
 					break;
 
-				case 0x69:	// ADC #$44 - immediate
+				case 0x69:    // ADC #$44 - immediate
 					doADC(context.readByte(pc));
 					pc++;
 					cycles += 2;
 					break;
 
-				case 0x6A:	// ROR A - Accumulator
+				case 0x6A:    // ROR A - Accumulator
 					a = doROR(a);
 					cycles += 2;
 					break;
@@ -1197,23 +1201,22 @@ endCycles = until;
 				case 0x6B:
 					throw new UnemulatedInstructionException(opcode);
 
-				case 0x6C:	// JMP ($5597) - Indirect
+				case 0x6C:    // JMP ($5597) - Indirect
 					addr = context.readWord(pc);
-					if ((addr&0xff)==0xff) {
-						pc = context.readByte(addr) | (context.readByte(addr&0xff00)<<8);
-					}
-					else {
+					if ((addr & 0xff) == 0xff) {
+						pc = context.readByte(addr) | (context.readByte(addr & 0xff00) << 8);
+					} else {
 						pc = context.readWord(addr);
 					}
 					cycles += 5;
 					break;
 
-				case 0x6D:	// ADC $4400 - Absolute
+				case 0x6D:    // ADC $4400 - Absolute
 					doADC(absolute_Read());
 					cycles += 4;
 					break;
 
-				case 0x6E:	// ROR $4400 - Absolute
+				case 0x6E:    // ROR $4400 - Absolute
 					doRORMem(context.readWord(pc));
 					pc += 2;
 					cycles += 6;
@@ -1222,11 +1225,11 @@ endCycles = until;
 				case 0x6F:
 					throw new UnemulatedInstructionException(opcode);
 
-				case 0x70:	// BVS - Branch on oVerflow Set
-					doBranch(flagV>0);
+				case 0x70:    // BVS - Branch on oVerflow Set
+					doBranch(flagV > 0);
 					break;
 
-				case 0x71:	// ADC ($44),Y - Indirect,Y
+				case 0x71:    // ADC ($44),Y - Indirect,Y
 					doADC(indirectIndexed_Read()); // cycles-- if page boundary crossed.
 					cycles += 5;
 					break;
@@ -1236,14 +1239,14 @@ endCycles = until;
 				case 0x73:
 					throw new UnemulatedInstructionException(opcode);
 
-				// 0x74 handled previously
+					// 0x74 handled previously
 
-				case 0x75:	// ADC $44,X - Zero page, X
+				case 0x75:    // ADC $44,X - Zero page, X
 					doADC(zeroPageIndexed_Read(x));
 					cycles += 4;
 					break;
 
-				case 0x76:	// ROR $44,X - Zero Page,X
+				case 0x76:    // ROR $44,X - Zero Page,X
 					doRORMem(_zeroPageIndexed(x));
 					cycles += 6;
 					break;
@@ -1256,7 +1259,7 @@ endCycles = until;
 					cycles += 2;
 					break;
 
-				case 0x79:	// ADC $4400,Y - Absolute,Y
+				case 0x79:    // ADC $4400,Y - Absolute,Y
 					doADC(absoluteIndex_Read(y)); // cycles-- if page boundary crossed.
 					cycles += 4;
 					break;
@@ -1266,14 +1269,14 @@ endCycles = until;
 				case 0x7B:
 					throw new UnemulatedInstructionException(opcode);
 
-				// 0x7C handled previously
+					// 0x7C handled previously
 
-				case 0x7D:	// ADC $4400,X - Absolute, X
+				case 0x7D:    // ADC $4400,X - Absolute, X
 					doADC(absoluteIndex_Read(x));
 					cycles += 4;
 					break;
 
-				case 0x7E:	// ROR $4400,X - Absolute,X
+				case 0x7E:    // ROR $4400,X - Absolute,X
 					doRORMem(_absIndexed(x));
 					cycles += 7;
 					break;
@@ -1281,7 +1284,7 @@ endCycles = until;
 				case 0x7F:
 					throw new UnemulatedInstructionException(opcode);
 
-				case 0x80:	// * DOP/SKB #$44 - Immediate
+				case 0x80:    // * DOP/SKB #$44 - Immediate
 				case 0x82:
 				case 0x89:
 				case 0xC2:
@@ -1290,7 +1293,7 @@ endCycles = until;
 					cycles += 2;
 					break;
 
-				case 0x81:	// STA ($44,X) - Indirect,X
+				case 0x81:    // STA ($44,X) - Indirect,X
 					indexedIndirect_Write(a);
 					cycles += 6;
 					break;
@@ -1300,17 +1303,17 @@ endCycles = until;
 				case 0x83:
 					throw new UnemulatedInstructionException(opcode);
 
-				case 0x84:	// STY $44 - Zero Page
+				case 0x84:    // STY $44 - Zero Page
 					zeroPage_Write(y);
 					cycles += 3;
 					break;
 
-				case 0x85:	// STA $44 - Zero Page
+				case 0x85:    // STA $44 - Zero Page
 					zeroPage_Write(a);
 					cycles += 3;
 					break;
 
-				case 0x86:	// STX $44 - Zero Page
+				case 0x86:    // STX $44 - Zero Page
 					zeroPage_Write(x);
 					cycles += 3;
 					break;
@@ -1318,14 +1321,14 @@ endCycles = until;
 				case 0x87:
 					throw new UnemulatedInstructionException(opcode);
 
-				case 0x88:	// DEY - Immediate
-					flagNZ = y = (y-1)&0xff;
+				case 0x88:    // DEY - Immediate
+					flagNZ = y = (y - 1) & 0xff;
 					cycles += 2;
 					break;
 
 				// 0x89 handled previously
 
-				case 0x8A:	// TXA - Immediate
+				case 0x8A:    // TXA - Immediate
 					flagNZ = a = x;
 					cycles += 2;
 					break;
@@ -1333,17 +1336,17 @@ endCycles = until;
 				case 0x8B:
 					throw new UnemulatedInstructionException(opcode);
 
-				case 0x8C:	// STY $4400 - Absolute
+				case 0x8C:    // STY $4400 - Absolute
 					absolute_Write(y);
 					cycles += 4;
 					break;
 
-				case 0x8D:	// STA $4400 - Absolute
+				case 0x8D:    // STA $4400 - Absolute
 					absolute_Write(a);
 					cycles += 4;
 					break;
 
-				case 0x8E:	// STX $4400 - Absolute
+				case 0x8E:    // STX $4400 - Absolute
 					absolute_Write(x);
 					cycles += 4;
 					break;
@@ -1351,11 +1354,11 @@ endCycles = until;
 				case 0x8F:
 					throw new UnemulatedInstructionException(opcode);
 
-				case 0x90:	// BCC - Branch on Carry Clear
-					doBranch(flagC==0);
+				case 0x90:    // BCC - Branch on Carry Clear
+					doBranch(flagC == 0);
 					break;
 
-				case 0x91:	// STA ($44),Y - Indirect,Y
+				case 0x91:    // STA ($44),Y - Indirect,Y
 					indirectIndexed_Write(a);
 					cycles += 6;
 					break;
@@ -1365,17 +1368,17 @@ endCycles = until;
 				case 0x93:
 					throw new UnemulatedInstructionException(opcode);
 
-				case 0x94:	// STY $44,X - Zero Page,X
+				case 0x94:    // STY $44,X - Zero Page,X
 					zeroPageIndexed_Write(x, y);
 					cycles += 4;
 					break;
 
-				case 0x95:	// STA $44,X - Zero Page,X
+				case 0x95:    // STA $44,X - Zero Page,X
 					zeroPageIndexed_Write(x, a);
 					cycles += 4;
 					break;
 
-				case 0x96:	// STX $44,Y - Zero Page,Y
+				case 0x96:    // STX $44,Y - Zero Page,Y
 					zeroPageIndexed_Write(y, x);
 					cycles += 4;
 					break;
@@ -1383,17 +1386,17 @@ endCycles = until;
 				case 0x97:
 					throw new UnemulatedInstructionException(opcode);
 
-				case 0x98:	// TYA - Immediate
+				case 0x98:    // TYA - Immediate
 					flagNZ = a = y;
 					cycles += 2;
 					break;
 
-				case 0x99:	// STA $4400,Y - Absolute,Y
+				case 0x99:    // STA $4400,Y - Absolute,Y
 					absoluteIndex_Write(y, a);
 					cycles += 5;
 					break;
 
-				case 0x9A:	// TXS - Implied
+				case 0x9A:    // TXS - Implied
 					sp = x;
 					cycles += 2;
 					break;
@@ -1404,7 +1407,7 @@ endCycles = until;
 				case 0x9C:
 					throw new UnemulatedInstructionException(opcode);
 
-				case 0x9D:	// STA $4400,X - Absolute,X
+				case 0x9D:    // STA $4400,X - Absolute,X
 					absoluteIndex_Write(x, a);
 					cycles += 5;
 					break;
@@ -1415,39 +1418,39 @@ endCycles = until;
 				case 0x9F:
 					throw new UnemulatedInstructionException(opcode);
 
-				case 0xA0:	// LDY #$44 - Immediate
+				case 0xA0:    // LDY #$44 - Immediate
 					doLDY(context.readByte(pc));
 					pc++;
 					cycles += 2;
 					break;
 
-				case 0xA1:	// LDA ($44,X) - Indirect,X
+				case 0xA1:    // LDA ($44,X) - Indirect,X
 					doLDA(indexedIndirect_Read());
 					cycles += 6;
 					break;
 
-				case 0xA2:	// LDX #$44 - Immediate
+				case 0xA2:    // LDX #$44 - Immediate
 					doLDX(context.readByte(pc));
 					pc++;
 					cycles += 2;
 					break;
 
-				case 0xA3:	// * LAX ($44,X) - Indirect,X
+				case 0xA3:    // * LAX ($44,X) - Indirect,X
 					doLAX(indexedIndirect_Read());
 					cycles += 6;
 					break;
 
-				case 0xA4:	// LDY $44 - Zero Page
+				case 0xA4:    // LDY $44 - Zero Page
 					doLDY(zeroPage_Read());
 					cycles += 3;
 					break;
 
-				case 0xA5:	// LDA $44 - Zero Page
+				case 0xA5:    // LDA $44 - Zero Page
 					doLDA(zeroPage_Read());
 					cycles += 3;
 					break;
 
-				case 0xA6:	// LDX $44 - Zero Page
+				case 0xA6:    // LDX $44 - Zero Page
 					doLDX(zeroPage_Read());
 					cycles += 3;
 					break;
@@ -1457,18 +1460,18 @@ endCycles = until;
 					cycles += 3;
 					break;
 
-				case 0xA8:	// TAY - Immediate
+				case 0xA8:    // TAY - Immediate
 					flagNZ = y = a;
 					cycles += 2;
 					break;
 
-				case 0xA9:	// LDA #$44 - Immediate
+				case 0xA9:    // LDA #$44 - Immediate
 					doLDA(context.readByte(pc));
 					pc++;
 					cycles += 2;
 					break;
 
-				case 0xAA:	// TAX - Immediate
+				case 0xAA:    // TAX - Immediate
 					flagNZ = x = a;
 					cycles += 2;
 					break;
@@ -1476,17 +1479,17 @@ endCycles = until;
 				case 0xAB:
 					throw new UnemulatedInstructionException(opcode);
 
-				case 0xAC:	// LDY $4400 - Absolute
+				case 0xAC:    // LDY $4400 - Absolute
 					doLDY(absolute_Read());
 					cycles += 4;
 					break;
 
-				case 0xAD:	// LDA $4400 - Absolute
+				case 0xAD:    // LDA $4400 - Absolute
 					doLDA(absolute_Read());
 					cycles += 4;
 					break;
 
-				case 0xAE:	// LDX $4400 - Absolute
+				case 0xAE:    // LDX $4400 - Absolute
 					doLDX(absolute_Read());
 					cycles += 4;
 					break;
@@ -1496,33 +1499,33 @@ endCycles = until;
 					cycles += 4;
 					break;
 
-				case 0xB0:	// BCS - Branch on Carry Set
-					doBranch(flagC>0);
+				case 0xB0:    // BCS - Branch on Carry Set
+					doBranch(flagC > 0);
 					break;
 
-				case 0xB1:	// LDA ($44),Y - Indirect,Y
+				case 0xB1:    // LDA ($44),Y - Indirect,Y
 					doLDA(indirectIndexed_Read()); // cycles-- if page boundary crossed.
 					cycles += 5;
 					break;
 
 				// 0xB2 handled previously
 
-				case 0xB3:	// * LAX ($44),Y - Indirect,Y
+				case 0xB3:    // * LAX ($44),Y - Indirect,Y
 					doLAX(indirectIndexed_Read()); // cycles-- if page boundary crossed.
 					cycles += 5;
 					break;
 
-				case 0xB4:	// LDY $44,X - Zero Page,X
+				case 0xB4:    // LDY $44,X - Zero Page,X
 					doLDY(zeroPageIndexed_Read(x));
 					cycles += 4;
 					break;
 
-				case 0xB5:	// LDA $44,X - Zero Page,X
+				case 0xB5:    // LDA $44,X - Zero Page,X
 					doLDA(zeroPageIndexed_Read(x));
 					cycles += 4;
 					break;
 
-				case 0xB6:	// LDX $44,Y - Zero Page,Y
+				case 0xB6:    // LDX $44,Y - Zero Page,Y
 					doLDX(zeroPageIndexed_Read(y));
 					cycles += 4;
 					break;
@@ -1532,17 +1535,17 @@ endCycles = until;
 					cycles += 4;
 					break;
 
-				case 0xB8:	// CLV - CLear oVerflow flag
+				case 0xB8:    // CLV - CLear oVerflow flag
 					flagV = 0;
 					cycles += 2;
 					break;
 
-				case 0xB9:	// LDA $4400,Y - Absolute,Y
+				case 0xB9:    // LDA $4400,Y - Absolute,Y
 					doLDA(absoluteIndex_Read(y)); // cycles-- if page boundary crossed.
 					cycles += 4;
 					break;
 
-				case 0xBA:	// TSX
+				case 0xBA:    // TSX
 					flagNZ = x = sp;
 					cycles += 2;
 					break;
@@ -1552,17 +1555,17 @@ endCycles = until;
 					cycles += 4;
 					break;
 
-				case 0xBC:	// LDY $4400,X - Absolute,X
+				case 0xBC:    // LDY $4400,X - Absolute,X
 					doLDY(absoluteIndex_Read(x)); // cycles-- if page boundary crossed.
 					cycles += 4;
 					break;
 
-				case 0xBD:	// LDA $4400,X - Absolute,X
+				case 0xBD:    // LDA $4400,X - Absolute,X
 					doLDA(absoluteIndex_Read(x)); // cycles-- if page boundary crossed.
 					cycles += 4;
 					break;
 
-				case 0xBE:	// LDX $4400,Y - Absolute,Y
+				case 0xBE:    // LDX $4400,Y - Absolute,Y
 					doLDX(absoluteIndex_Read(y)); // cycles-- if page boundary crossed.
 					cycles += 4;
 					break;
@@ -1572,13 +1575,13 @@ endCycles = until;
 					cycles += 4;
 					break;
 
-				case 0xC0:	// CPY #$44 - Immediate
+				case 0xC0:    // CPY #$44 - Immediate
 					doCMP(y, context.readByte(pc));
 					pc++;
 					cycles += 2;
 					break;
 
-				case 0xC1:	// CMP ($44,X) - Indirect,X
+				case 0xC1:    // CMP ($44,X) - Indirect,X
 					doCMP(a, indexedIndirect_Read());
 					cycles += 6;
 					break;
@@ -1588,17 +1591,17 @@ endCycles = until;
 				case 0xC3:
 					throw new UnemulatedInstructionException(opcode);
 
-				case 0xC4:	// CPY $44 - Zero Page
+				case 0xC4:    // CPY $44 - Zero Page
 					doCMP(y, zeroPage_Read());
 					cycles += 3;
 					break;
 
-				case 0xC5:	// CMP $44 - Zero Page
+				case 0xC5:    // CMP $44 - Zero Page
 					doCMP(a, zeroPage_Read());
 					cycles += 3;
 					break;
 
-				case 0xC6:	// DEC $44 - Zero Page
+				case 0xC6:    // DEC $44 - Zero Page
 					doDECMem(_zeroPage());
 					cycles += 5;
 					break;
@@ -1606,36 +1609,36 @@ endCycles = until;
 				case 0xC7:
 					throw new UnemulatedInstructionException(opcode);
 
-				case 0xC8:	// INY - Immediate
-					flagNZ = y = (y+1)&0xff;
+				case 0xC8:    // INY - Immediate
+					flagNZ = y = (y + 1) & 0xff;
 					cycles += 2;
 					break;
 
-				case 0xC9:	// CMP #$44 - Compare immediate
+				case 0xC9:    // CMP #$44 - Compare immediate
 					doCMP(a, context.readByte(pc));
 					pc++;
 					cycles += 2;
 					break;
 
-				case 0xCA:	// DEX - Immediate
-					flagNZ = x = (x-1)&0xff;
+				case 0xCA:    // DEX - Immediate
+					flagNZ = x = (x - 1) & 0xff;
 					cycles += 2;
 					break;
 
 				case 0xCB:
 					throw new UnemulatedInstructionException(opcode);
 
-				case 0xCC:	// CPY $4400 - Absolute
+				case 0xCC:    // CPY $4400 - Absolute
 					doCMP(y, absolute_Read());
 					cycles += 4;
 					break;
 
-				case 0xCD:	// CMP $4400 - Absolute
+				case 0xCD:    // CMP $4400 - Absolute
 					doCMP(a, absolute_Read());
 					cycles += 4;
 					break;
 
-				case 0xCE:	// DEC $4400 - Absolute
+				case 0xCE:    // DEC $4400 - Absolute
 					doDECMem(context.readWord(pc));
 					pc += 2;
 					cycles += 6;
@@ -1644,11 +1647,11 @@ endCycles = until;
 				case 0xCF:
 					throw new UnemulatedInstructionException(opcode);
 
-				case 0xD0:	// BNE - Branch on Not Equal
-					doBranch(getFlagZ()==0);
+				case 0xD0:    // BNE - Branch on Not Equal
+					doBranch(getFlagZ() == 0);
 					break;
 
-				case 0xD1:	// CMP ($44),Y - Indirect,Y
+				case 0xD1:    // CMP ($44),Y - Indirect,Y
 					doCMP(a, indirectIndexed_Read()); // cycles-- if page boundary crossed.
 					cycles += 5;
 					break;
@@ -1658,14 +1661,14 @@ endCycles = until;
 				case 0xD3:
 					throw new UnemulatedInstructionException(opcode);
 
-				// 0xD4 handled previously
+					// 0xD4 handled previously
 
-				case 0xD5:	// CMP $44,X - Zero Page,X
+				case 0xD5:    // CMP $44,X - Zero Page,X
 					doCMP(a, zeroPageIndexed_Read(x));
 					cycles += 4;
 					break;
 
-				case 0xD6:	// DEC $44,X - Zero Page,X
+				case 0xD6:    // DEC $44,X - Zero Page,X
 					doDECMem(_zeroPageIndexed(x));
 					cycles += 6;
 					break;
@@ -1673,12 +1676,12 @@ endCycles = until;
 				case 0xD7:
 					throw new UnemulatedInstructionException(opcode);
 
-				case 0xD8:	// CLD - CLear Decimal flag
+				case 0xD8:    // CLD - CLear Decimal flag
 					flagD = 0;
 					cycles += 2;
 					break;
 
-				case 0xD9:	// CMP $4400,Y - Absolute,Y
+				case 0xD9:    // CMP $4400,Y - Absolute,Y
 					doCMP(a, absoluteIndex_Read(y)); // cycles-- if page boundary crossed.
 					cycles += 4;
 					break;
@@ -1688,14 +1691,14 @@ endCycles = until;
 				case 0xDB:
 					throw new UnemulatedInstructionException(opcode);
 
-				// 0xDC handled previously
+					// 0xDC handled previously
 
-				case 0xDD:	// CMP $4400,X - Absolute,X
+				case 0xDD:    // CMP $4400,X - Absolute,X
 					doCMP(a, absoluteIndex_Read(x)); // cycles-- if page boundary crossed.
 					cycles += 4;
 					break;
 
-				case 0xDE:	// DEC $4400,X - Absolute,X
+				case 0xDE:    // DEC $4400,X - Absolute,X
 					doDECMem(_absIndexed(x));
 					cycles += 7;
 					break;
@@ -1703,13 +1706,13 @@ endCycles = until;
 				case 0xDF:
 					throw new UnemulatedInstructionException(opcode);
 
-				case 0xE0:	// CPX #$44 - Immediate
+				case 0xE0:    // CPX #$44 - Immediate
 					doCMP(x, context.readByte(pc));
 					pc++;
 					cycles += 2;
 					break;
 
-				case 0xE1:	// SBC ($44,X) - Indirect,X
+				case 0xE1:    // SBC ($44,X) - Indirect,X
 					doSBC(indexedIndirect_Read());
 					cycles += 6;
 					break;
@@ -1721,17 +1724,17 @@ endCycles = until;
 					cycles += 8;
 					break;
 
-				case 0xE4:	// CPX $44 - Zero Page
+				case 0xE4:    // CPX $44 - Zero Page
 					doCMP(x, zeroPage_Read());
 					cycles += 3;
 					break;
 
-				case 0xE5:	// SBC $44 - Zero Page
+				case 0xE5:    // SBC $44 - Zero Page
 					doSBC(zeroPage_Read());
 					cycles += 3;
 					break;
 
-				case 0xE6:	// INC $44 - Zero Page
+				case 0xE6:    // INC $44 - Zero Page
 					doINCMem(_zeroPage());
 					cycles += 5;
 					break;
@@ -1741,12 +1744,12 @@ endCycles = until;
 					cycles += 5;
 					break;
 
-				case 0xE8:	// INX - Immediate
-					flagNZ = x = (x+1)&0xff;
+				case 0xE8:    // INX - Immediate
+					flagNZ = x = (x + 1) & 0xff;
 					cycles += 2;
 					break;
 
-				case 0xE9:	// SBC #$44 - Immediate
+				case 0xE9:    // SBC #$44 - Immediate
 					doSBC(context.readByte(pc));
 					pc++;
 					cycles += 2;
@@ -1760,17 +1763,17 @@ endCycles = until;
 					cycles += 2;
 					break;
 
-				case 0xEC:	// CPX $4400 - Absolute
+				case 0xEC:    // CPX $4400 - Absolute
 					doCMP(x, absolute_Read());
 					cycles += 4;
 					break;
 
-				case 0xED:	// SBC $4400 - Absolute
+				case 0xED:    // SBC $4400 - Absolute
 					doSBC(absolute_Read());
 					cycles += 4;
 					break;
 
-				case 0xEE:	// INC $4400 - Absolute
+				case 0xEE:    // INC $4400 - Absolute
 					doINCMem(context.readWord(pc));
 					pc += 2;
 					cycles += 6;
@@ -1782,11 +1785,11 @@ endCycles = until;
 					cycles += 6;
 					break;
 
-				case 0xF0:	// BEQ - Branch on EQual
-					doBranch(getFlagZ()>0);
+				case 0xF0:    // BEQ - Branch on EQual
+					doBranch(getFlagZ() > 0);
 					break;
 
-				case 0xF1:	// SBC ($44),Y - Indirect,Y
+				case 0xF1:    // SBC ($44),Y - Indirect,Y
 					doSBC(indirectIndexed_Read()); // cycles-- if page boundary crossed.
 					cycles += 5;
 					break;
@@ -1800,12 +1803,12 @@ endCycles = until;
 
 				// 0xF4 handled previously
 
-				case 0xF5:	// SBC $44,X - Zero Page,X
+				case 0xF5:    // SBC $44,X - Zero Page,X
 					doSBC(zeroPageIndexed_Read(x));
 					cycles += 4;
 					break;
 
-				case 0xF6:	// INC $44,X - Zero Page,X
+				case 0xF6:    // INC $44,X - Zero Page,X
 					doINCMem(_zeroPageIndexed(x));
 					cycles += 6;
 					break;
@@ -1815,12 +1818,12 @@ endCycles = until;
 					cycles += 6;
 					break;
 
-				case 0xF8:	// SED - SEt Decimal flag
+				case 0xF8:    // SED - SEt Decimal flag
 					flagD = 1;
 					cycles += 2;
 					break;
 
-				case 0xF9:	// SBC $4400,Y - Absolute,Y
+				case 0xF9:    // SBC $4400,Y - Absolute,Y
 					doSBC(absoluteIndex_Read(y)); // cycles-- if page boundary crossed.
 					cycles += 4;
 					break;
@@ -1834,12 +1837,12 @@ endCycles = until;
 
 				// 0xFC handled previously
 
-				case 0xFD:	// SBC $4400,X - Absolute,X
+				case 0xFD:    // SBC $4400,X - Absolute,X
 					doSBC(absoluteIndex_Read(x)); // cycles-- if page boundary crossed.
 					cycles += 4;
 					break;
 
-				case 0xFE:	// INC $4400,X - Absolute,X
+				case 0xFE:    // INC $4400,X - Absolute,X
 					doINCMem(_absIndexed(x));
 					cycles += 7;
 					break;
@@ -1900,7 +1903,7 @@ endCycles = until;
 		// Sometimes bit 8 of flagNZ gets set as a side-effect of
 		// operations, and that is what we must check for the sign
 		// bit.  So we OR bits 7 and 8 together and just check both.
-		return ((flagNZ|(flagNZ>>1))&N_BIT)>>7;
+		return ((flagNZ | (flagNZ >> 1)) & N_BIT) >> 7;
 	}
 
 	/**
@@ -1925,7 +1928,7 @@ endCycles = until;
 		// the results of the last operation done.  We must mask
 		// to a byte as we use bit 8 of flagNZ in checking for the
 		// sign bit, as sometimes our operations sets that bit.
-		return (flagNZ&0xff)==0 ? 1 : 0;
+		return (flagNZ & 0xff) == 0 ? 1 : 0;
 	}
 
 	/**
@@ -1950,13 +1953,13 @@ endCycles = until;
 		// NOTE: Flag Z is stored "opposite" as we use flaNZ the "opposite"
 		// way of having a Z flag (e.g., it being "0" => Z flag is "set,"
 		// it being "!= 0" => Z flag "clear."
-		return	flagC |
-				/*getFlagZ()>0?0x02:0x00*/((flagNZ&0xff)>0 ? 0x00 : 0x02) |
-				(flagI<<2) |
-				(flagD<<3) |
-				(flagB<<4) |
-				(flagV<<6) |
-				/*getFlagN()<<7;*/((flagNZ|(flagNZ>>1))&N_BIT);
+		return flagC |
+				/*getFlagZ()>0?0x02:0x00*/((flagNZ & 0xff) > 0 ? 0x00 : 0x02) |
+			(flagI << 2) |
+			(flagD << 3) |
+			(flagB << 4) |
+			(flagV << 6) |
+				/*getFlagN()<<7;*/((flagNZ | (flagNZ >> 1)) & N_BIT);
 	}
 
 	/**
@@ -1982,28 +1985,28 @@ endCycles = until;
 	}
 
 	public int getStatusFlag(int flag) {
-		if (flag==0) {
+		if (flag == 0) {
 			return getFlagC();
 		}
-		if (flag==1) {
+		if (flag == 1) {
 			return getFlagZ();
 		}
-		if (flag==2) {
+		if (flag == 2) {
 			return getFlagI();
 		}
 		if (flag == 3) {
 			return getFlagD();
 		}
-		if (flag==4) {
+		if (flag == 4) {
 			return getFlagB();
 		}
-		if (flag==5) {
+		if (flag == 5) {
 			return 0;
 		}
-		if (flag==6) {
+		if (flag == 6) {
 			return getFlagV();
 		}
-		if (flag==7) {
+		if (flag == 7) {
 			return getFlagN();
 		}
 		throw new IllegalArgumentException("Invalid flag value: " + flag);
@@ -2057,7 +2060,7 @@ endCycles = until;
 	 * @see #nmi()
 	 */
 	public void irq() {
-		if (flagI==0) {
+		if (flagI == 0) {
 			pushWord(pc);
 			pushByte(getRegP());
 			flagI = 1;
@@ -2089,7 +2092,7 @@ endCycles = until;
 	 */
 	public int peekByte(int offs) {
 		offs = (sp + offs + 1) & 0xff;
-		return context.readByteSafely(STACK_BOTTOM|offs);
+		return context.readByteSafely(STACK_BOTTOM | offs);
 	}
 
 
@@ -2101,8 +2104,8 @@ endCycles = until;
 	 * @see #popWord()
 	 */
 	private int popByte() {
-		sp = (sp+1)&0xff;
-		return context.readByte(STACK_BOTTOM|sp);
+		sp = (sp + 1) & 0xff;
+		return context.readByte(STACK_BOTTOM | sp);
 	}
 
 	/**
@@ -2116,10 +2119,10 @@ endCycles = until;
 		// TODO: This is always on the stack so we should be
 		// able to directly access context.ram if we want to
 		// cheat.
-		sp = (sp+1)&0xff;
-		int word  = context.readByte(STACK_BOTTOM|sp);
-		sp = (sp+1)&0xff;
-		word     |= (context.readByte(STACK_BOTTOM|sp)<<8);
+		sp = (sp + 1) & 0xff;
+		int word = context.readByte(STACK_BOTTOM | sp);
+		sp = (sp + 1) & 0xff;
+		word |= (context.readByte(STACK_BOTTOM | sp) << 8);
 		return word;
 	}
 
@@ -2132,8 +2135,8 @@ endCycles = until;
 	 * @see #pushWord(int)
 	 */
 	private void pushByte(int b) {
-		context.writeByte(STACK_BOTTOM+sp, b);
-		sp = (sp-1)&0xff;
+		context.writeByte(STACK_BOTTOM + sp, b);
+		sp = (sp - 1) & 0xff;
 	}
 
 	/**
@@ -2145,10 +2148,10 @@ endCycles = until;
 	 * @see #pushByte(int)
 	 */
 	private void pushWord(int word) {
-		context.writeByte(STACK_BOTTOM+sp, (word>>8)&0xff);
-		sp = (sp-1)&0xff;
-		context.writeByte(STACK_BOTTOM+sp, word&0xff);
-		sp = (sp-1)&0xff;
+		context.writeByte(STACK_BOTTOM + sp, (word >> 8) & 0xff);
+		sp = (sp - 1) & 0xff;
+		context.writeByte(STACK_BOTTOM + sp, word & 0xff);
+		sp = (sp - 1) & 0xff;
 	}
 
 	/**
@@ -2176,19 +2179,19 @@ endCycles = until;
 	 * @see #getRegP()
 	 */
 	public void setRegP(int p) {
-		flagNZ = ((p&N_BIT)<<1) | (~p&0x02);//((p&0x02)>>1);
-		flagV =  (p&0x40)>>6;
-		flagB =  (p&0x10)>>4;
-		flagD =  (p&0x08)>>3;
-		flagI =  (p&0x04)>>2;
-		flagC =  p&0x01;
+		flagNZ = ((p & N_BIT) << 1) | (~p & 0x02);//((p&0x02)>>1);
+		flagV = (p & 0x40) >> 6;
+		flagB = (p & 0x10) >> 4;
+		flagD = (p & 0x08) >> 3;
+		flagI = (p & 0x04) >> 2;
+		flagC = p & 0x01;
 	}
 
 	/**
 	 * Stops this CPU.
 	 */
 	public void stop() {
-		if (debugOut!=null) {
+		if (debugOut != null) {
 			debugOut.close();
 		}
 	}
@@ -2228,7 +2231,7 @@ endCycles = until;
 	 * (STA, STX, STY, SAX).
 	 *
 	 * @param index The index.
-	 * @param b The byte to write.
+	 * @param b     The byte to write.
 	 */
 	private void zeroPageIndexed_Write(int index, int b) {
 		context.writeByte(_zeroPageIndexed(index), b);

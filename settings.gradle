@@ -1,4 +1,4 @@
 rootProject.name = 'nesemu'
 
-include 'framework', 'n6502'
+include 'framework', 'n6502', 'finnes', 'finnes-swing'
 
