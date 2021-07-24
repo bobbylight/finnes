@@ -1,3 +1,7 @@
+plugins {
+    id 'com.github.spotbugs' version '4.7.1'
+}
+
 group 'org.fifesoft'
 version '0.1.0-SNAPSHOT'
 
@@ -10,34 +14,55 @@ allprojects {
         }
     }
 
-    task wrapper(type: Wrapper) {
-        gradleVersion = '3.4'
+    wrapper {
+       gradleVersion = '7.1.1'
     }
 }
 
 subprojects {
     apply plugin: 'java'
     apply plugin: 'checkstyle'
-    apply plugin: 'findbugs'
-    sourceCompatibility = 1.8
+    apply plugin: 'com.github.spotbugs'
 
     checkstyle {
-        toolVersion = '7.6'
-        configFile = '../config/checkstyle/checkstyle.xml' as File
+        toolVersion = '8.43'
+        configDirectory = file("$rootProject.projectDir/config/checkstyle")
     }
 
-    tasks.withType(FindBugs) {
+    spotbugsMain {
         reports {
-            xml.enabled = false
-            html.enabled = true
+            html {
+                enabled = true
+            }
+            xml {
+                enabled = false
+            }
+        }
+    }
+    spotbugsTest {
+        reports {
+            html {
+                enabled = true
+            }
+            xml {
+                enabled = false
+            }
         }
     }
 
     dependencies {
-        compile 'org.slf4j:slf4j-api:1.7.24'
-        compile 'ch.qos.logback:logback-classic:1.2.1'
-        compile 'ch.qos.logback:logback-core:1.2.1'
-        compile 'com.google.code.findbugs:annotations:3.0.1u2'
-        testCompile 'junit:junit:4.12'
+        implementation 'org.slf4j:slf4j-api:1.7.24'
+        implementation 'ch.qos.logback:logback-classic:1.2.1'
+        implementation 'ch.qos.logback:logback-core:1.2.1'
+        implementation 'com.google.code.findbugs:annotations:3.0.1u2'
+        testImplementation 'junit:junit:4.13.2'
+    }
+
+    compileJava {
+        sourceCompatibility '1.8'
+        targetCompatibility '1.8'
+        options.debug = true
+        options.debugOptions.debugLevel = 'source,vars,lines'
+        options.compilerArgs << "-Xlint:deprecation" << '-Xlint:unchecked'
     }
 }

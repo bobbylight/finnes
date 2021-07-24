@@ -17,7 +17,7 @@ public abstract class AbstractPortIOCpu extends AbstractCpu
 									implements PortIOCpu, Serializable {
 
 	private InputPortWriter inputPortWriter;
-	private List outputPortReaderList;
+	private List<OutputPortReader> outputPortReaderList;
 	protected int[] outputPorts;	// Output ports (256).
 
 	/**
@@ -31,7 +31,7 @@ public abstract class AbstractPortIOCpu extends AbstractCpu
 	public AbstractPortIOCpu(CpuContext context, float clockSpeed,
 								InputPortWriter writer, int outputPortCount) {
 		super(context, clockSpeed);
-		outputPortReaderList = new ArrayList(1);
+		outputPortReaderList = new ArrayList<>(1);
 		this.inputPortWriter = writer;
 		outputPorts = new int[outputPortCount];
 	}
@@ -97,7 +97,7 @@ public abstract class AbstractPortIOCpu extends AbstractCpu
 		// Notify any listeners of the port value change.
 		int count = outputPortReaderList.size();
 		for (int i = 0; i < count; i++) {
-			OutputPortReader r = (OutputPortReader)outputPortReaderList.get(i);
+			OutputPortReader r = outputPortReaderList.get(i);
 			r.outputPortValueChanged(port, old, value);
 		}
 
